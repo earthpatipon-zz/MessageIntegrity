@@ -1,7 +1,6 @@
 
 public class Receiver {
 	
-	private String algorithm;
 	private String hash;
 	
 	public Receiver() {}

@@ -15,16 +15,16 @@ public class Sender {
 		writeFile("email", text);
 
 		switch (algorithm) {
-			case "SHA-256":
-				try {
-					hash = sha256(text);
-					writeFile("Checksum", hash);
-				} catch (NoSuchAlgorithmException e) {
-					e.printStackTrace();
-				}
-				break;
-			default:
-				break;
+		case "SHA-256":
+			try {
+				hash = sha256(text);
+				writeFile("Checksum", hash);
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -40,6 +40,7 @@ public class Sender {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 	}
 
 	public String sha256(String text) throws NoSuchAlgorithmException {

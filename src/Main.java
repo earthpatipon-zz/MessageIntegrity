@@ -17,6 +17,9 @@ public class Main {
 		case 1:
 			algorithm = "SHA-256";
 			break;
+		case 2:
+			algorithm = "MD5";
+			break;
 		default:
 			algorithm = "";
 			break;
