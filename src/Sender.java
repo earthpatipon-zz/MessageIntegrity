@@ -20,7 +20,7 @@ public class Sender {
 			file = new File("inbox/email.txt");
 			fop = new FileOutputStream(file);
 
-			// if file doesnt exists, then create it
+			// if file doesn't exists, then create it
 			if (!file.exists()) {
 				file.createNewFile();
 			}
@@ -45,6 +45,13 @@ public class Sender {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public String md5 (FileOutputStream fop) {
+		String str = "";
+		
+		return str;
+		
 	}
 	
 	

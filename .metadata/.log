@@ -1,0 +1,32 @@
+!SESSION 2018-05-19 14:54:26.137 -----------------------------------------------
+eclipse.buildId=4.7.0.I20170612-0950
+java.version=1.8.0_111
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -product org.eclipse.epp.package.java.product -keyring /Users/tanapornpipatnoraseth/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -product org.eclipse.epp.package.java.product -keyring /Users/tanapornpipatnoraseth/.eclipse_keyring
+
+!ENTRY org.eclipse.core.net 1 0 2018-05-19 14:54:34.838
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY org.eclipse.core.net 1 0 2018-05-19 14:54:34.842
+!MESSAGE System property http.proxyHost is not set but should be proxy-sa.mahidol.
+
+!ENTRY org.eclipse.core.net 1 0 2018-05-19 14:54:34.843
+!MESSAGE System property http.proxyPort is not set but should be 8080.
+!SESSION 2018-05-19 14:56:49.107 -----------------------------------------------
+eclipse.buildId=4.7.0.I20170612-0950
+java.version=1.8.0_111
+java.vendor=Oracle Corporation
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -product org.eclipse.epp.package.java.product -keyring /Users/tanapornpipatnoraseth/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -product org.eclipse.epp.package.java.product -keyring /Users/tanapornpipatnoraseth/.eclipse_keyring
+
+!ENTRY org.eclipse.core.net 1 0 2018-05-19 14:57:06.291
+!MESSAGE System property http.nonProxyHosts has been set to local|*.local|169.254/16|*.169.254/16 by an external source. This value will be overwritten using the values from the preferences
+
+!ENTRY org.eclipse.core.net 1 0 2018-05-19 14:57:06.295
+!MESSAGE System property http.proxyHost is not set but should be proxy-sa.mahidol.
+
+!ENTRY org.eclipse.core.net 1 0 2018-05-19 14:57:06.296
+!MESSAGE System property http.proxyPort is not set but should be 8080.
