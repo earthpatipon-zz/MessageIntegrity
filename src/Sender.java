@@ -17,7 +17,7 @@ public class Sender {
 		File file;
 
 		try {
-			file = new File("email.txt");
+			file = new File("inbox/email.txt");
 			fop = new FileOutputStream(file);
 
 			// if file doesnt exists, then create it
@@ -46,4 +46,6 @@ public class Sender {
 			}
 		}
 	}
+	
+	
 }
