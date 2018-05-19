@@ -1,51 +1,51 @@
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class Sender {
-	
+
 	private String algorithm;
 	private String email;
-	
+	private String hash;
+
 	public Sender(String algo) {
 		this.algorithm = algo;
 	}
-	
+
 	public void writeEmail(String text) {
-		FileOutputStream fop = null;
-		File file;
+		BufferedWriter bw;
+		FileWriter fw;
 
 		try {
-			file = new File("inbox/email.txt");
-			fop = new FileOutputStream(file);
-
-			// if file doesnt exists, then create it
-			if (!file.exists()) {
-				file.createNewFile();
-			}
-
-			// get the content in bytes
-			byte[] contentInBytes = text.getBytes();
-
-			fop.write(contentInBytes);
-			fop.flush();
-			fop.close();
-
-			System.out.println("Done");
-
+			fw = new FileWriter("inbox/email.txt");
+			bw = new BufferedWriter(fw);
+			bw.write(text);
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			try {
-				if (fop != null) {
-					fop.close();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 		}
+		
 	}
-	
-	
+
+	public void createChecksum(String algorithm) throws NoSuchAlgorithmException {
+		String x = sha256("123456");
+	}
+
+	public String sha256(String text) throws NoSuchAlgorithmException {
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		md.update(text.getBytes());
+
+		// convert the byte to hex
+		byte byteData[] = md.digest();
+		StringBuffer hexString = new StringBuffer();
+		for (int i = 0; i < byteData.length; i++) {
+			String hex = Integer.toHexString(0xff & byteData[i]);
+			if (hex.length() == 1)
+				hexString.append('0');
+			hexString.append(hex);
+		}
+		System.out.println("Hex format : " + hexString.toString());
+		return hexString.toString();
+	}
 }
