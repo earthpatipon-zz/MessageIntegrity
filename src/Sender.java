@@ -15,13 +15,15 @@ public class Sender {
 	}
 
 	public void writeEmail(String text) {
-		BufferedWriter bw;
-		FileWriter fw;
+		BufferedWriter bw = null;
+		FileWriter fw = null;
 
 		try {
 			fw = new FileWriter("inbox/email.txt");
 			bw = new BufferedWriter(fw);
 			bw.write(text);
+			bw.close();
+			System.out.println(text);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
