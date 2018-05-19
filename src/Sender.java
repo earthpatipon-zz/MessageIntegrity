@@ -1,6 +1,4 @@
 import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -20,7 +18,7 @@ public class Sender {
 		case "SHA-256":
 			try {
 				hash = sha256(text);
-				writeFile("Checksum", hash);
+				writeFile("checksum", hash);
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
 			}
@@ -28,7 +26,7 @@ public class Sender {
 		case "MD5":
 			try {
 				hash = md5(text);
-				writeFile("Checksum", hash);
+				writeFile("checksum", hash);
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
 			}
@@ -57,31 +55,31 @@ public class Sender {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		md.update(text.getBytes());
 
-		// convert the byte to hex
+		// convert byte to hex
 		byte byteData[] = md.digest();
-		StringBuffer hexString = new StringBuffer();
+		StringBuffer strBuffer = new StringBuffer();
 		for (int i = 0; i < byteData.length; i++) {
 			String hex = Integer.toHexString(0xff & byteData[i]);
 			if (hex.length() == 1)
-				hexString.append('0');
-			hexString.append(hex);
+				strBuffer.append('0');
+			strBuffer.append(hex);
 		}
-		System.out.println("Hex format (Sender): " + hexString.toString());
-		return hexString.toString();
+		System.out.println("Checksum with SHA-256 (Sender): " + strBuffer.toString());
+		return strBuffer.toString();
 	}
 	
-	public String md5 (String text) throws NoSuchAlgorithmException, IOException {
+	public String md5 (String text) throws NoSuchAlgorithmException {
 		MessageDigest md = MessageDigest.getInstance("MD5");
 		md.update(text.getBytes());
-		byte[] mdBytes = md.digest();
 		
 		//convert byte to hex
+		byte[] mdBytes = md.digest();
 		StringBuffer strBuffer = new StringBuffer();
 		for (int i = 0; i < mdBytes.length; i++) {
 			// set strBuffer 
 			strBuffer.append(Integer.toString((mdBytes[i] & 0xff) + 0x100, 16).substring(1));
 		}
-		
+		System.out.println("Checksum with MD5 (Sender): " + strBuffer.toString());
 		return strBuffer.toString();
 	}
 }

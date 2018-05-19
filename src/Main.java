@@ -1,13 +1,17 @@
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
 
 	public static void main(String[] args) {
 		String algorithm;
+		Sender sd = new Sender();
+		Receiver rv = new Receiver();
 		
 		// TODO Auto-generated method stub
 		System.out.println("Available algorigthm for Message Integrity Service:");
 		System.out.println("1. Checksum with SHA-256");
+		System.out.println("2. Checksum with MD5");
 		System.out.print("Select algorithm (in number): ");
 		
 		Scanner input = new Scanner(System.in);
@@ -25,14 +29,20 @@ public class Main {
 			break;
 		}
 		
+		System.out.println("-----Sender-----");
 		System.out.print("Write text in email: ");
 		String text = input.nextLine();
 		input.close();
 		
-		Sender sd = new Sender();
-		Receiver rv = new Receiver();
+		try {
+			sd.send(algorithm, text);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		sd.send(algorithm, text);
+		System.out.println("-----Receiver-----");
+		rv.read(algorithm);
 	}
 
 }
