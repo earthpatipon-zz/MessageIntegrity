@@ -1,4 +1,6 @@
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -11,13 +13,21 @@ public class Sender {
 	public Sender() {
 	}
 
-	public void send(String algorithm, String text) {
+	public void send(String algorithm, String text) throws IOException {
 		writeFile("email", text);
 
 		switch (algorithm) {
 		case "SHA-256":
 			try {
 				hash = sha256(text);
+				writeFile("Checksum", hash);
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+			break;
+		case "MD5":
+			try {
+				hash = md5(text);
 				writeFile("Checksum", hash);
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
@@ -58,5 +68,20 @@ public class Sender {
 		}
 		System.out.println("Hex format (Sender): " + hexString.toString());
 		return hexString.toString();
+	}
+	
+	public String md5 (String text) throws NoSuchAlgorithmException, IOException {
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		md.update(text.getBytes());
+		byte[] mdBytes = md.digest();
+		
+		//convert byte to hex
+		StringBuffer strBuffer = new StringBuffer();
+		for (int i = 0; i < mdBytes.length; i++) {
+			// set strBuffer 
+			strBuffer.append(Integer.toString((mdBytes[i] & 0xff) + 0x100, 16).substring(1));
+		}
+		
+		return strBuffer.toString();
 	}
 }
