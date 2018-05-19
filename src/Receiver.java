@@ -14,28 +14,37 @@ public class Receiver {
 	}
 
 	public void read(String algorithm) {
-		readFile("email", text);
+		text = readFile("email");
 
 		switch (algorithm) {
-		case "SHA-256":
-			try {
-				hash = sha256(text);
-				readFile("Checksum", checksum);
-				validate(hash, checksum);
-			} catch (NoSuchAlgorithmException e) {
-				e.printStackTrace();
+			case "SHA-256":
+				try {
+					hash = sha256(text);
+					checksum = readFile("checksum");
+					validate(hash, checksum);
+				} catch (NoSuchAlgorithmException e) {
+					e.printStackTrace();
+				}
+				break;
+			case "MD5":
+				try {
+					hash = md5(text);
+					checksum = readFile("checksum");
+					validate(hash, checksum);
+				} catch (NoSuchAlgorithmException e) {
+					e.printStackTrace();
+				}
+				break;
+			default:
+				break;
 			}
-			break;
-		default:
-			break;
-		}
 	}
 
-	public void readFile(String filename, String toStr) {
+	public String readFile(String filename) {
 		BufferedReader br = null;
 		FileReader fr = null;
-		StringBuilder sb;
-		String currentLine;
+		StringBuilder sb = null;
+		String currentLine = "";
 
 		try {
 			fr = new FileReader("inbox/" + filename + ".txt");
@@ -45,17 +54,18 @@ public class Receiver {
 			while ((currentLine = br.readLine()) != null) {
 				sb.append(currentLine);
 			}
-			toStr = sb.toString();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		return sb.toString();
 	}
 	
 	public void validate(String hashText, String checksumValue) {
-		System.out.println(hashText);
-		System.out.println(checksumValue);
 		if(hashText.equals(checksumValue)) {
-			System.out.println("Correct. This message is secured.");
+			System.out.println("Correct. This email message is secured.");
+		}
+		else {
+			System.out.println("Incorrect. This email message isn't secured.");
 		}
 	}
 
@@ -63,16 +73,37 @@ public class Receiver {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		md.update(text.getBytes());
 
-		// convert the byte to hex
+		// convert byte to hex
 		byte byteData[] = md.digest();
-		StringBuffer hexString = new StringBuffer();
+		StringBuffer strBuffer = new StringBuffer();
 		for (int i = 0; i < byteData.length; i++) {
 			String hex = Integer.toHexString(0xff & byteData[i]);
 			if (hex.length() == 1)
-				hexString.append('0');
-			hexString.append(hex);
+				strBuffer.append('0');
+			strBuffer.append(hex);
 		}
-		System.out.println("Hex format (Sender): " + hexString.toString());
-		return hexString.toString();
+		System.out.println("Text in email: " + text);
+		System.out.println("Checksum with SHA-256 (Receiver): " + strBuffer.toString());
+		return strBuffer.toString();
+	}
+	
+	public String md5 (String text) throws NoSuchAlgorithmException {
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		md.update(text.getBytes());
+		
+		//convert byte to hex
+		byte[] mdBytes = md.digest();
+		StringBuffer strBuffer = new StringBuffer();
+		for (int i = 0; i < mdBytes.length; i++) {
+			// set strBuffer 
+			strBuffer.append(Integer.toString((mdBytes[i] & 0xff) + 0x100, 16).substring(1));
+		}
+		System.out.println("Text in email: " + text);
+		System.out.println("Checksum with MD5 (Receiver): " + strBuffer.toString());
+		return strBuffer.toString();
+	}
+	
+	public String getText() {
+		return this.text;
 	}
 }

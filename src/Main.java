@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
@@ -10,6 +11,7 @@ public class Main {
 		// TODO Auto-generated method stub
 		System.out.println("Available algorigthm for Message Integrity Service:");
 		System.out.println("1. Checksum with SHA-256");
+		System.out.println("2. Checksum with MD5");
 		System.out.print("Select algorithm (in number): ");
 		
 		Scanner input = new Scanner(System.in);
@@ -31,7 +33,13 @@ public class Main {
 		System.out.print("Write text in email: ");
 		String text = input.nextLine();
 		input.close();
-		sd.send(algorithm, text);
+		
+		try {
+			sd.send(algorithm, text);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		System.out.println("-----Receiver-----");
 		rv.read(algorithm);
