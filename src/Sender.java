@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 public class Sender {
 
 	private String hash;
+	private String path;
 
 	public Sender() {
 	}
@@ -41,7 +42,8 @@ public class Sender {
 		FileWriter fw = null;
 
 		try {
-			fw = new FileWriter("inbox/" + filename + ".txt");
+			path = "inbox/" + filename + ".txt";
+			fw = new FileWriter(path);
 			bw = new BufferedWriter(fw);
 			bw.write(text);
 			bw.close();
@@ -81,5 +83,9 @@ public class Sender {
 		}
 		System.out.println("Checksum with MD5 (Sender): " + strBuffer.toString());
 		return strBuffer.toString();
+	}
+	
+	public String getPath () {
+		return path;
 	}
 }

@@ -1,12 +1,14 @@
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Scanner;
 
 public class Main {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws FileNotFoundException {
 		String algorithm;
 		Sender sd = new Sender();
 		Receiver rv = new Receiver();
+		Attacker at = new Attacker();
 		
 		// TODO Auto-generated method stub
 		System.out.println("Available algorigthm for Message Integrity Service:");
@@ -32,7 +34,6 @@ public class Main {
 		System.out.println("-----Sender-----");
 		System.out.print("Write text in email: ");
 		String text = input.nextLine();
-		input.close();
 		
 		try {
 			sd.send(algorithm, text);
@@ -40,6 +41,14 @@ public class Main {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		System.out.println("-----Attacker-----");
+		System.out.println("Have attacker or not? (y/n): ");
+		if (input.nextLine().equals("y")) {
+			at.attack(sd.getPath());
+		}
+
+		input.close();
 		
 		System.out.println("-----Receiver-----");
 		rv.read(algorithm);
