@@ -6,32 +6,40 @@ import java.security.NoSuchAlgorithmException;
 
 public class Sender {
 
-	private String algorithm;
-	private String email;
 	private String hash;
 
-	public Sender(String algo) {
-		this.algorithm = algo;
+	public Sender() {
 	}
 
-	public void writeEmail(String text) {
+	public void send(String algorithm, String text) {
+		writeFile("email", text);
+
+		switch (algorithm) {
+			case "SHA-256":
+				try {
+					hash = sha256(text);
+					writeFile("Checksum", hash);
+				} catch (NoSuchAlgorithmException e) {
+					e.printStackTrace();
+				}
+				break;
+			default:
+				break;
+		}
+	}
+
+	public void writeFile(String filename, String text) {
 		BufferedWriter bw = null;
 		FileWriter fw = null;
 
 		try {
-			fw = new FileWriter("inbox/email.txt");
+			fw = new FileWriter("inbox/" + filename + ".txt");
 			bw = new BufferedWriter(fw);
 			bw.write(text);
 			bw.close();
-			System.out.println(text);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-	}
-
-	public void createChecksum(String algorithm) throws NoSuchAlgorithmException {
-		String x = sha256("123456");
 	}
 
 	public String sha256(String text) throws NoSuchAlgorithmException {
@@ -47,7 +55,7 @@ public class Sender {
 				hexString.append('0');
 			hexString.append(hex);
 		}
-		System.out.println("Hex format : " + hexString.toString());
+		System.out.println("Hex format (Sender): " + hexString.toString());
 		return hexString.toString();
 	}
 }

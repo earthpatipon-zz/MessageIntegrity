@@ -3,15 +3,16 @@ import java.util.Scanner;
 public class Main {
 
 	public static void main(String[] args) {
+		String algorithm;
+		
 		// TODO Auto-generated method stub
 		System.out.println("Available algorigthm for Message Integrity Service:");
-		System.out.println("1. SHA-256");
+		System.out.println("1. Checksum with SHA-256");
 		System.out.print("Select algorithm (in number): ");
 		
-		String algorithm;
 		Scanner input = new Scanner(System.in);
-		int chose = Integer.parseInt( input.nextLine() );
-		
+		int chose = Integer.parseInt(input.nextLine());
+	
 		switch(chose){
 		case 1:
 			algorithm = "SHA-256";
@@ -21,14 +22,14 @@ public class Main {
 			break;
 		}
 		
-		Sender sd = new Sender(algorithm);
-		Receiver rv = new Receiver(algorithm);
-		
-		System.out.println("Write text in email: ");
+		System.out.print("Write text in email: ");
 		String text = input.nextLine();
 		input.close();
 		
-		sd.writeEmail(text);
+		Sender sd = new Sender();
+		Receiver rv = new Receiver();
+		
+		sd.send(algorithm, text);
 	}
 
 }

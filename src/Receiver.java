@@ -2,11 +2,9 @@
 public class Receiver {
 	
 	private String algorithm;
-	private String email;
+	private String hash;
 	
-	public Receiver(String algo) {
-		this.algorithm = algo;
-	}
+	public Receiver() {}
 	
 	public void readEmail(String text) {
 		
