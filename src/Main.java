@@ -4,6 +4,8 @@ public class Main {
 
 	public static void main(String[] args) {
 		String algorithm;
+		Sender sd = new Sender();
+		Receiver rv = new Receiver();
 		
 		// TODO Auto-generated method stub
 		System.out.println("Available algorigthm for Message Integrity Service:");
@@ -25,14 +27,14 @@ public class Main {
 			break;
 		}
 		
+		System.out.println("-----Sender-----");
 		System.out.print("Write text in email: ");
 		String text = input.nextLine();
 		input.close();
-		
-		Sender sd = new Sender();
-		Receiver rv = new Receiver();
-		
 		sd.send(algorithm, text);
+		
+		System.out.println("-----Receiver-----");
+		rv.read(algorithm);
 	}
 
 }
