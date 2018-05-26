@@ -1,19 +1,27 @@
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.Scanner;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 public class Main {
 
-	public static void main(String[] args) throws FileNotFoundException {
+	public static void main(String[] args) throws FileNotFoundException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 		String algorithm;
 		Sender sd = new Sender();
-		Receiver rv = new Receiver();
+		Recipient rv = new Recipient();
 		Attacker at = new Attacker();
 		
 		// TODO Auto-generated method stub
 		System.out.println("Available algorigthm for Message Integrity Service:");
 		System.out.println("1. Checksum with SHA-256");
 		System.out.println("2. Checksum with MD5");
+		System.out.println("2. Checksum with SHA-1");
 		System.out.print("Select algorithm (in number): ");
 		
 		Scanner input = new Scanner(System.in);
@@ -25,6 +33,9 @@ public class Main {
 			break;
 		case 2:
 			algorithm = "MD5";
+			break;
+		case 3:
+			algorithm = "SHA-1";
 			break;
 		default:
 			algorithm = "";
@@ -50,7 +61,7 @@ public class Main {
 
 		input.close();
 		
-		System.out.println("-----Receiver-----");
+		System.out.println("-----Recipient-----");
 		rv.read(algorithm);
 	}
 

@@ -1,21 +1,34 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
-public class Receiver {
+public class Recipient {
 
 	private String hash;
 	private String text;
 	private String checksum;
+	private KeyPair key;
+	private PrivateKey privateKey;
+	private PublicKey publicKey;
 	
-	public Receiver() {
+	public Recipient() throws NoSuchAlgorithmException {
+		key = KeyPairGenerator.getInstance("RSA").generateKeyPair();
+		privateKey = key.getPrivate();
+		publicKey = key.getPublic();
 	}
 
 	public void read(String algorithm) {
+		
+		//Radix-64 conversion
+		
 		text = readFile("email");
-
+		
 		switch (algorithm) {
 			case "SHA-256":
 				try {
@@ -35,6 +48,14 @@ public class Receiver {
 					e.printStackTrace();
 				}
 				break;
+			case "SHA-1":
+				try {
+					hash = sha1(text);
+					checksum = readFile("checksum");
+					validate(hash, checksum);
+				} catch (NoSuchAlgorithmException e) {
+					e.printStackTrace();
+				}
 			default:
 				break;
 			}
@@ -103,7 +124,27 @@ public class Receiver {
 		return strBuffer.toString();
 	}
 	
+	public String sha1 (String text) throws NoSuchAlgorithmException {
+		MessageDigest md = MessageDigest.getInstance("SHA-1");
+		md.update(text.getBytes());
+		
+		//convert byte to hex
+		byte[] mdBytes = md.digest();
+		StringBuffer strBuffer = new StringBuffer();
+		for (int i = 0; i < mdBytes.length; i++) {
+			// set strBuffer 
+			strBuffer.append(Integer.toString((mdBytes[i] & 0xff) + 0x100, 16).substring(1));
+		}
+		System.out.println("Text in email: " + text);
+		System.out.println("Checksum with SHA-1 (Receiver): " + strBuffer.toString());
+		return strBuffer.toString();
+	}
+	
 	public String getText() {
 		return this.text;
+	}
+	
+	public PublicKey getPublicKey () {
+		return publicKey;
 	}
 }
