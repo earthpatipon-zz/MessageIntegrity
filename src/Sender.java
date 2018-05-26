@@ -35,9 +35,9 @@ public class Sender {
 		publicKey = key.getPublic();
 	}
 
-	public void send(String algorithm, String text) throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-<<<<<<< HEAD
-		
+	public void send(String algorithm, String text) throws IOException, NoSuchAlgorithmException, InvalidKeyException,
+			SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+
 		switch (algorithm) {
 		case "SHA-256":
 			try {
@@ -57,7 +57,7 @@ public class Sender {
 			break;
 		case "RSA-1":
 			try {
-				hash = sha1(text); //160-bits hash code
+				hash = sha1(text); // 160-bits hash code
 				writeFile("checksum", hash);
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
@@ -66,55 +66,22 @@ public class Sender {
 		default:
 			break;
 		}
-		
+
 		byte[] hashBytes = hash.getBytes();
-=======
 
-//		switch (algorithm) {
-//		case "SHA-256":
-//			try {
-//				hash = sha256(text);
-//				writeFile("checksum", hash);
-//			} catch (NoSuchAlgorithmException e) {
-//				e.printStackTrace();
-//			}
-//			break;
-//		case "MD5":
-//			try {
-//				hash = md5(text);
-//				writeFile("checksum", hash);
-//			} catch (NoSuchAlgorithmException e) {
-//				e.printStackTrace();
-//			}
-//			break;
-//		case "RSA-1":
-//			try {
-//				hash = sha1(text); //160-bits hash code
-//				writeFile("checksum", hash);
-//			} catch (NoSuchAlgorithmException e) {
-//				e.printStackTrace();
-//			}
-//			break;
-//		default:
-//			break;
-//		}
-
-		byte[] hashBytes = hash.getBytes("UTF8");
->>>>>>> bdf5ae6536587368888bb28b92fe3036235a5236
-		
-		//Encrypt hash value with private key of the sender
+		// Encrypt hash value with private key of the sender
 		Signature signature = Signature.getInstance("RSA");
 		signature.initSign(privateKey);
 		signature.update(hashBytes);
-		
+
 		byte[] digitalSignature = signature.sign();
-		
+
 		signature.initVerify(publicKey);
 		signature.update(hashBytes);
-		
+
 		String dsComponent = recipient.getPublicKey().toString() + "," + digitalSignature.toString();
-		
-		//Create session key and encrypt it
+
+		// Create session key and encrypt it
 		SecureRandom random = new SecureRandom();
 		byte[] aesBytes = new byte[16];
 		random.nextBytes(aesBytes);
@@ -123,19 +90,19 @@ public class Sender {
 		Cipher encryptedSessionKey = Cipher.getInstance("AES");
 		encryptedSessionKey.init(Cipher.ENCRYPT_MODE, recipient.getPublicKey());
 		encryptedSessionKey.doFinal(sessionKey.toString().getBytes());
-		
+
 		String sessionKeyComponent = recipient.getPublicKey() + "," + encryptedSessionKey;
-		
-		//Encrypt the pain text using the session key
+
+		// Encrypt the pain text using the session key
 		Cipher cipher = Cipher.getInstance("AES");
 		cipher.init(Cipher.ENCRYPT_MODE, sessionKey);
 		cipher.doFinal(text.getBytes());
-		
+
 		String message = sessionKeyComponent + "\n" + dsComponent + "\n" + cipher;
-		
-		//Radix-64 conversion
+
+		// Radix-64 conversion
 		String encodedMessage = Base64.getEncoder().encodeToString(message.getBytes());
-		
+
 		writeFile("email", encodedMessage);
 	}
 
@@ -154,59 +121,59 @@ public class Sender {
 		}
 
 	}
-	
-	public String getPath () {
+
+	public String getPath() {
 		return path;
 	}
-	
-	public PublicKey getPublicKey () {
+
+	public PublicKey getPublicKey() {
 		return publicKey;
 	}
-	
-//	public String sha256(String text) throws NoSuchAlgorithmException {
-//	MessageDigest md = MessageDigest.getInstance("SHA-256");
-//	md.update(text.getBytes());
-//
-//	// convert byte to hex
-//	byte byteData[] = md.digest();
-//	StringBuffer strBuffer = new StringBuffer();
-//	for (int i = 0; i < byteData.length; i++) {
-//		String hex = Integer.toHexString(0xff & byteData[i]);
-//		if (hex.length() == 1)
-//			strBuffer.append('0');
-//		strBuffer.append(hex);
-//	}
-//	System.out.println("Checksum with SHA-256 (Sender): " + strBuffer.toString());
-//	return strBuffer.toString();
-//}
-//
-//public String md5 (String text) throws NoSuchAlgorithmException {
-//	MessageDigest md = MessageDigest.getInstance("MD5");
-//	md.update(text.getBytes());
-//	
-//	//convert byte to hex
-//	byte[] mdBytes = md.digest();
-//	StringBuffer strBuffer = new StringBuffer();
-//	for (int i = 0; i < mdBytes.length; i++) {
-//		// set strBuffer 
-//		strBuffer.append(Integer.toString((mdBytes[i] & 0xff) + 0x100, 16).substring(1));
-//	}
-//	System.out.println("Checksum with MD5 (Sender): " + strBuffer.toString());
-//	return strBuffer.toString();
-//}
-//
-//public String sha1 (String text) throws NoSuchAlgorithmException {
-//	MessageDigest md = MessageDigest.getInstance("SHA-1");
-//	md.update(text.getBytes());
-//	
-//	//convert byte to hex
-//	byte[] mdBytes = md.digest();
-//	StringBuffer strBuffer = new StringBuffer();
-//	for (int i = 0; i < mdBytes.length; i++) {
-//		// set strBuffer 
-//		strBuffer.append(Integer.toString((mdBytes[i] & 0xff) + 0x100, 16).substring(1));
-//	}
-//	System.out.println("Checksum with SHA-1 (Sender): " + strBuffer.toString());
-//	return strBuffer.toString();
-//}
+
+	public String sha256(String text) throws NoSuchAlgorithmException {
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		md.update(text.getBytes());
+
+		// convert byte to hex
+		byte byteData[] = md.digest();
+		StringBuffer strBuffer = new StringBuffer();
+		for (int i = 0; i < byteData.length; i++) {
+			String hex = Integer.toHexString(0xff & byteData[i]);
+			if (hex.length() == 1)
+				strBuffer.append('0');
+			strBuffer.append(hex);
+		}
+		System.out.println("Checksum with SHA-256 (Sender): " + strBuffer.toString());
+		return strBuffer.toString();
+	}
+
+	public String md5(String text) throws NoSuchAlgorithmException {
+		MessageDigest md = MessageDigest.getInstance("MD5");
+		md.update(text.getBytes());
+
+		// convert byte to hex
+		byte[] mdBytes = md.digest();
+		StringBuffer strBuffer = new StringBuffer();
+		for (int i = 0; i < mdBytes.length; i++) {
+			// set strBuffer
+			strBuffer.append(Integer.toString((mdBytes[i] & 0xff) + 0x100, 16).substring(1));
+		}
+		System.out.println("Checksum with MD5 (Sender): " + strBuffer.toString());
+		return strBuffer.toString();
+	}
+
+	public String sha1(String text) throws NoSuchAlgorithmException {
+		MessageDigest md = MessageDigest.getInstance("SHA-1");
+		md.update(text.getBytes());
+
+		// convert byte to hex
+		byte[] mdBytes = md.digest();
+		StringBuffer strBuffer = new StringBuffer();
+		for (int i = 0; i < mdBytes.length; i++) {
+			// set strBuffer
+			strBuffer.append(Integer.toString((mdBytes[i] & 0xff) + 0x100, 16).substring(1));
+		}
+		System.out.println("Checksum with SHA-1 (Sender): " + strBuffer.toString());
+		return strBuffer.toString();
+	}
 }
