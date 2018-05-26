@@ -36,7 +36,7 @@ public class Sender {
 	}
 
 	public void send(String algorithm, String text) throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-
+		
 		switch (algorithm) {
 		case "SHA-256":
 			try {
@@ -65,36 +65,37 @@ public class Sender {
 		default:
 			break;
 		}
-
-		byte[] hashBytes = hash.getBytes("UTF8");
+		
+		byte[] hashBytes = hash.getBytes();
 		
 		//Encrypt hash value with private key of the sender
 		Signature signature = Signature.getInstance("RSA");
 		signature.initSign(privateKey);
 		signature.update(hashBytes);
+		
 		byte[] digitalSignature = signature.sign();
 		
 		signature.initVerify(publicKey);
 		signature.update(hashBytes);
 		
 		String dsComponent = recipient.getPublicKey().toString() + "," + digitalSignature.toString();
-				
+		
 		//Create session key and encrypt it
 		SecureRandom random = new SecureRandom();
 		byte[] aesBytes = new byte[16];
 		random.nextBytes(aesBytes);
 		SecretKey sessionKey = new SecretKeySpec(aesBytes, "AES");
 
-		Cipher encryptedSessionKey = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		Cipher encryptedSessionKey = Cipher.getInstance("AES");
 		encryptedSessionKey.init(Cipher.ENCRYPT_MODE, recipient.getPublicKey());
 		encryptedSessionKey.doFinal(sessionKey.toString().getBytes());
 		
 		String sessionKeyComponent = recipient.getPublicKey() + "," + encryptedSessionKey;
 		
 		//Encrypt the pain text using the session key
-		Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+		Cipher cipher = Cipher.getInstance("AES");
 		cipher.init(Cipher.ENCRYPT_MODE, sessionKey);
-		cipher.doFinal(hashBytes);
+		cipher.doFinal(text.getBytes());
 		
 		String message = sessionKeyComponent + "\n" + dsComponent + "\n" + cipher;
 		

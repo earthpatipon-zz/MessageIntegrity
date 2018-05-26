@@ -1,13 +1,25 @@
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.util.Base64;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 public class Recipient {
 
@@ -17,6 +29,7 @@ public class Recipient {
 	private KeyPair key;
 	private PrivateKey privateKey;
 	private PublicKey publicKey;
+	private Sender sender = new Sender();
 	
 	public Recipient() throws NoSuchAlgorithmException {
 		key = KeyPairGenerator.getInstance("RSA").generateKeyPair();
@@ -24,7 +37,7 @@ public class Recipient {
 		publicKey = key.getPublic();
 	}
 
-	public void read(String algorithm) {
+	public void read(String algorithm) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, SignatureException, InvalidAlgorithmParameterException {
 		
 		text = readFile("email");
 		
@@ -37,45 +50,64 @@ public class Recipient {
 		 */
 		String[] component = message.split("\n");
 		
-		int num = component.length;
-		if (num == 3) {
+		if (component.length == 3) {
 			
 			String[] sessionKeyComponent = component[0].split(",");
 			String[] dsComponent = component[1].split(",");
-			String cipher = component[2];
+			text = component[2];
 			
+			// Decrypt session key using private key of the recipient
+			Cipher sessionKey = Cipher.getInstance("AES");
+			sessionKey.init(Cipher.DECRYPT_MODE, privateKey);
+			sessionKey.doFinal(sessionKeyComponent[1].getBytes());
 			
+			// Verify Digital Signature
+			Signature sign = Signature.getInstance("RSA");
+			sign.initVerify(sender.getPublicKey());
+			sign.update(text.getBytes());
 			
-			switch (algorithm) {
-				case "SHA-256":
-					try {
-						hash = sha256(text);
-						checksum = readFile("checksum");
-						validate(hash, checksum);
-					} catch (NoSuchAlgorithmException e) {
-						e.printStackTrace();
+			if (sign.verify(dsComponent[1].getBytes())) {
+				
+				Cipher cipher = Cipher.getInstance("AES");
+				cipher.init(Cipher.DECRYPT_MODE, (Key) sessionKey, cipher.getParameters());
+				byte[] sentTextBytes = cipher.doFinal(text.getBytes());
+				String sentText = new String(sentTextBytes);
+				
+				switch (algorithm) {
+					case "SHA-256":
+						try {
+							hash = sha256(sentText);
+							checksum = readFile("checksum");
+							validate(hash, checksum);
+						} catch (NoSuchAlgorithmException e) {
+							e.printStackTrace();
+						}
+						break;
+					case "MD5":
+						try {
+							hash = md5(sentText);
+							checksum = readFile("checksum");
+							validate(hash, checksum);
+						} catch (NoSuchAlgorithmException e) {
+							e.printStackTrace();
+						}
+						break;
+					case "SHA-1":
+						try {
+							hash = sha1(sentText);
+							checksum = readFile("checksum");
+							validate(hash, checksum);
+						} catch (NoSuchAlgorithmException e) {
+							e.printStackTrace();
+						}
+					default:
+						break;
 					}
-					break;
-				case "MD5":
-					try {
-						hash = md5(text);
-						checksum = readFile("checksum");
-						validate(hash, checksum);
-					} catch (NoSuchAlgorithmException e) {
-						e.printStackTrace();
-					}
-					break;
-				case "SHA-1":
-					try {
-						hash = sha1(text);
-						checksum = readFile("checksum");
-						validate(hash, checksum);
-					} catch (NoSuchAlgorithmException e) {
-						e.printStackTrace();
-					}
-				default:
-					break;
-				}
+			}
+			else {
+				System.out.println("\ndigital signature not match\n");
+			}
+			
 		}
 		else {
 			System.out.println("Error!");
