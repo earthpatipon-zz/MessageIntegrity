@@ -29,7 +29,6 @@ public class Recipient {
 	private KeyPair key;
 	private PrivateKey privateKey;
 	private PublicKey publicKey;
-	private Sender sender = new Sender();
 	
 	public Recipient() throws NoSuchAlgorithmException {
 		key = KeyPairGenerator.getInstance("RSA").generateKeyPair();
@@ -37,7 +36,7 @@ public class Recipient {
 		publicKey = key.getPublic();
 	}
 
-	public void read(String algorithm) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, SignatureException, InvalidAlgorithmParameterException {
+	public void read(String algorithm, PublicKey senderPublicKey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException, SignatureException, InvalidAlgorithmParameterException {
 		
 		text = readFile("email");
 		
@@ -46,27 +45,39 @@ public class Recipient {
 		String message = new String(decodedBytes);
 		
 		/*
-		 *  message = sessionKeyComponent + "\n" + dsComponent + "\n" + cipher 	
+		 *  message = sessionKeyComponent + dsComponent + cipher 	
 		 */
-		String[] component = message.split("\n");
+		
+		String[] component = message.split(",");
+		System.out.println(component.length);
+		
+		/*
+		 * 
+		 *  component.length = 3
+		 *  
+		 *  component[0] = session key
+		 *  component[1] = digital signature
+		 *  component[2] = cipher text
+		 *  
+		 */
 		
 		if (component.length == 3) {
 			
-			String[] sessionKeyComponent = component[0].split(",");
-			String[] dsComponent = component[1].split(",");
+//			String[] sessionKeyComponent = component[0].split(",");
+//			String[] dsComponent = component[1].split(",");
 			text = component[2];
 			
 			// Decrypt session key using private key of the recipient
-			Cipher sessionKey = Cipher.getInstance("AES");
+			Cipher sessionKey = Cipher.getInstance("RSA");
 			sessionKey.init(Cipher.DECRYPT_MODE, privateKey);
-			sessionKey.doFinal(sessionKeyComponent[1].getBytes());
+			sessionKey.doFinal(component[0].getBytes());
 			
 			// Verify Digital Signature
-			Signature sign = Signature.getInstance("RSA");
-			sign.initVerify(sender.getPublicKey());
+			Signature sign = Signature.getInstance("SHA1withRSA");
+			sign.initVerify(senderPublicKey);
 			sign.update(text.getBytes());
 			
-			if (sign.verify(dsComponent[1].getBytes())) {
+			if (sign.verify(component[1].getBytes())) {
 				
 				Cipher cipher = Cipher.getInstance("AES");
 				cipher.init(Cipher.DECRYPT_MODE, (Key) sessionKey, cipher.getParameters());

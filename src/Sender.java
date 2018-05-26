@@ -27,7 +27,6 @@ public class Sender {
 	private KeyPair key;
 	private PrivateKey privateKey;
 	private PublicKey publicKey;
-	Recipient recipient = new Recipient();
 
 	public Sender() throws NoSuchAlgorithmException {
 		key = KeyPairGenerator.getInstance("RSA").generateKeyPair();
@@ -35,9 +34,9 @@ public class Sender {
 		publicKey = key.getPublic();
 	}
 
-	public void send(String algorithm, String text) throws IOException, NoSuchAlgorithmException, InvalidKeyException,
+	public void send(String algorithm, String text, PublicKey recipientPublicKey) throws IOException, NoSuchAlgorithmException, InvalidKeyException,
 			SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-
+		
 		switch (algorithm) {
 		case "SHA-256":
 			try {
@@ -55,7 +54,7 @@ public class Sender {
 				e.printStackTrace();
 			}
 			break;
-		case "RSA-1":
+		case "SHA-1":
 			try {
 				hash = sha1(text); // 160-bits hash code
 				writeFile("checksum", hash);
@@ -68,18 +67,16 @@ public class Sender {
 		}
 
 		byte[] hashBytes = hash.getBytes();
-
+		
 		// Encrypt hash value with private key of the sender
-		Signature signature = Signature.getInstance("RSA");
+		Signature signature = Signature.getInstance("SHA1withRSA");
 		signature.initSign(privateKey);
 		signature.update(hashBytes);
 
 		byte[] digitalSignature = signature.sign();
-
+		
 		signature.initVerify(publicKey);
 		signature.update(hashBytes);
-
-		String dsComponent = recipient.getPublicKey().toString() + "," + digitalSignature.toString();
 
 		// Create session key and encrypt it
 		SecureRandom random = new SecureRandom();
@@ -87,18 +84,16 @@ public class Sender {
 		random.nextBytes(aesBytes);
 		SecretKey sessionKey = new SecretKeySpec(aesBytes, "AES");
 
-		Cipher encryptedSessionKey = Cipher.getInstance("AES");
-		encryptedSessionKey.init(Cipher.ENCRYPT_MODE, recipient.getPublicKey());
+		Cipher encryptedSessionKey = Cipher.getInstance("RSA");
+		encryptedSessionKey.init(Cipher.ENCRYPT_MODE, recipientPublicKey);
 		encryptedSessionKey.doFinal(sessionKey.toString().getBytes());
-
-		String sessionKeyComponent = recipient.getPublicKey() + "," + encryptedSessionKey;
 
 		// Encrypt the pain text using the session key
 		Cipher cipher = Cipher.getInstance("AES");
 		cipher.init(Cipher.ENCRYPT_MODE, sessionKey);
 		cipher.doFinal(text.getBytes());
 
-		String message = sessionKeyComponent + "\n" + dsComponent + "\n" + cipher;
+		String message = encryptedSessionKey + "," + digitalSignature + "," + cipher;
 
 		// Radix-64 conversion
 		String encodedMessage = Base64.getEncoder().encodeToString(message.getBytes());
@@ -165,6 +160,8 @@ public class Sender {
 	public String sha1(String text) throws NoSuchAlgorithmException {
 		MessageDigest md = MessageDigest.getInstance("SHA-1");
 		md.update(text.getBytes());
+		
+		System.out.println("\n\n"+md.toString());
 
 		// convert byte to hex
 		byte[] mdBytes = md.digest();
