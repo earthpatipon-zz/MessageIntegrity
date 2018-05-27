@@ -3,11 +3,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 public class Sender {
 
@@ -16,8 +22,8 @@ public class Sender {
 	public Sender() {
 	}
 
-	public void send(String algorithm, String text) throws IOException {
-		writeFile("email", text);
+	public void send(String algorithm, String text, PublicKey publicKey) throws IOException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException {
+		//writeFile("email", text);
 
 		switch (algorithm) {
 		case "SHA-1":
@@ -44,9 +50,18 @@ public class Sender {
 				e.printStackTrace();
 			}
 			break;
+		case "Key":
+			Cipher cipher = Cipher.getInstance("RSA");
+			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+			text = cipher.doFinal(text.getBytes()).toString();
+//			System.out.println("\nin case using key: "+text);
+			break;
 		default:
 			break;
 		}
+		
+		System.out.println(text);
+		writeFile("email", text);
 	}
 
 	public void writeFile(String filename, String text) {

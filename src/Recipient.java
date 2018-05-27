@@ -3,11 +3,17 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 public class Recipient {
 
@@ -18,10 +24,19 @@ public class Recipient {
 	public Recipient() {
 	}
 
-	public void read(String algorithm) {
+	public void read(String algorithm, PrivateKey privateKey) throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
 		text = readFile("email");
 
 		switch (algorithm) {
+			case "SHA-1":
+				try {
+					hash = sha1(text);
+					checksum = readFile("checksum");
+					validate(hash, checksum);
+				} catch (NoSuchAlgorithmException e) {
+					e.printStackTrace();
+				}
+				break;
 			case "SHA-256":
 				try {
 					hash = sha256(text);
@@ -40,9 +55,16 @@ public class Recipient {
 					e.printStackTrace();
 				}
 				break;
+			case "Key":
+				Cipher cipher = Cipher.getInstance("RSA");
+				cipher.init(Cipher.DECRYPT_MODE, privateKey);
+				text = cipher.doFinal(text.getBytes()).toString();
+//				System.out.println("\nin case using key: "+text);
 			default:
 				break;
 			}
+		
+		getMessage(text);
 	}
 
 	public String readFile(String filename) {
@@ -86,7 +108,7 @@ public class Recipient {
 			strBuffer.append(Integer.toString((mdBytes[i] & 0xff) + 0x100, 16).substring(1));
 		}
 		System.out.println("Text in email: " + text);
-		System.out.println("Checksum with MD5 (Receiver): " + strBuffer.toString());
+		System.out.println("Checksum with MD5 (Recipient): " + strBuffer.toString());
 		return strBuffer.toString();
 	}
 	
@@ -102,7 +124,7 @@ public class Recipient {
 			strBuffer.append(Integer.toString((mdBytes[i] & 0xff) + 0x100, 16).substring(1));
 		}
 		System.out.println("Text in email: " + text);
-		System.out.println("Checksum with SHA-1 (Receiver): " + strBuffer.toString());
+		System.out.println("Checksum with SHA-1 (Recipient): " + strBuffer.toString());
 		return strBuffer.toString();
 	}
 	
@@ -122,5 +144,10 @@ public class Recipient {
 		System.out.println("Text in email: " + text);
 		System.out.println("Checksum with SHA-256 (Recipient): " + strBuffer.toString());
 		return strBuffer.toString();
+	}
+	
+	public void getMessage(String text) {
+		System.out.println("You've got a message!");
+		System.out.println(text);
 	}
 }

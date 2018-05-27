@@ -14,6 +14,7 @@ import java.util.Scanner;
 import javax.crypto.Cipher;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 
 public class Main {
@@ -21,9 +22,12 @@ public class Main {
 	public static void main(String[] args) throws FileNotFoundException, NoSuchAlgorithmException, InvalidKeyException,
 			SignatureException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException,
 			UnsupportedEncodingException, InvalidAlgorithmParameterException {
+		
 		String algorithm = "";
 		Sender sd = new Sender();
 		Recipient rp = new Recipient();
+		PrivateKey privateKey = null;
+		PublicKey publicKey = null;
 
 		// TODO Auto-generated method stub
 		System.out.println("Available algorigthm for Message Integrity Service:");
@@ -48,9 +52,13 @@ public class Main {
 			algorithm = "SHA-256";
 			break;
 		case 4:
-			KeyPair keyPair = buildKeyPair();
-			PublicKey pubKey = keyPair.getPublic();
-			PrivateKey privateKey = keyPair.getPrivate();
+			algorithm = "Key";
+			//Build private, public key pair
+			KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+			keyGen.initialize(1024);
+			KeyPair keyPair = keyGen.genKeyPair();
+			publicKey = keyPair.getPublic();
+			privateKey = keyPair.getPrivate();
 			break;
 		case 5:
 			algorithm = "NONE";
@@ -64,16 +72,16 @@ public class Main {
 		System.out.print("Write text in email: ");
 		String text = input.nextLine();
 		input.close();
-
+		
 		try {
-			sd.send(algorithm, text);
+			sd.send(algorithm, text, publicKey);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		System.out.println("-----Receiver-----");
-		rp.read(algorithm);
+		rp.read(algorithm, privateKey);
 	}
 
 }
