@@ -3,6 +3,10 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Image;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -22,11 +26,20 @@ import javax.swing.JScrollPane;
 import java.awt.Panel;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+
 import javax.swing.JTextArea;
 
 public class Sender_GUI extends JFrame {
 
 	private JPanel contentPane;
+	private String decrypt="";
+	private String text;
 
 	/**
 	 * Launch the application.
@@ -48,6 +61,58 @@ public class Sender_GUI extends JFrame {
 	 * Create the frame.
 	 */
 	public Sender_GUI() {
+		initialize();
+		
+		
+	}
+	
+	public Sender_GUI(String algorithm, PrivateKey privatekey) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	
+		Recipient rp = new Recipient();
+		rp.read(algorithm, privatekey);
+		
+		switch (algorithm) {
+		case "SHA-1":
+			try {
+				text = readFile("email");
+				decrypt = rp.sha1(algorithm);
+				
+			
+				
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+			break;
+		case "SHA-256":
+			try {
+				text = readFile("email");
+				decrypt = rp.sha256(algorithm);
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+			break;
+		case "MD5":
+			try {
+				text = readFile("email");
+				decrypt = rp.md5(algorithm);
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+			break;
+		case "Key":
+			text = readFile("email");
+			Cipher cipher = Cipher.getInstance("RSA");
+			cipher.init(Cipher.DECRYPT_MODE, privatekey);
+			text = cipher.doFinal(text.getBytes()).toString();
+//			System.out.println("\nin case using key: "+text);
+		default:
+			break;
+		}
+		initialize();
+	}
+	
+	private void initialize() {
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 672, 578);
 		contentPane = new JPanel();
@@ -112,17 +177,36 @@ public class Sender_GUI extends JFrame {
 		label_1.setBounds(0, 0, 163, 531);
 		contentPane.add(label_1);
 		
-		JTextArea textArea = new JTextArea();
+		TextArea textArea = new TextArea();
+		textArea.setFont(new Font("Dialog", Font.PLAIN, 20));
 		textArea.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				JOptionPane.showMessageDialog(null, "This is the decrypt message","Decrypt message", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(null, decrypt,"Decrypt message", JOptionPane.INFORMATION_MESSAGE);
 			}
-			
 		});
+		textArea.setText(text);
 		textArea.setEditable(false);
-		textArea.setLineWrap(true);
-		textArea.setBounds(178, 203, 464, 302);
+		textArea.setBounds(189, 204, 440, 295);
 		contentPane.add(textArea);
+	}
+	public String readFile(String filename) {
+		BufferedReader br = null;
+		FileReader fr = null;
+		StringBuilder sb = null;
+		String currentLine = "";
+
+		try {
+			fr = new FileReader("inbox/" + filename + ".txt");
+			br = new BufferedReader(fr);
+			sb = new StringBuilder();
+			
+			while ((currentLine = br.readLine()) != null) {
+				sb.append(currentLine);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return sb.toString();
 	}
 }
