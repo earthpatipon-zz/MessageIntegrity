@@ -1,4 +1,5 @@
 import java.io.BufferedWriter;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -20,6 +21,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import org.apache.commons.codec.binary.*;
 
 public class Sender {
 
@@ -193,6 +195,6 @@ public class Sender {
 		Cipher cipher = Cipher.getInstance(algo);
 		cipher.init(Cipher.ENCRYPT_MODE, key);
 		
-		return cipher.doFinal(text.getBytes());
+		return Base64.getEncoder().encode(cipher.doFinal(text.getBytes()));
 	}
 }
