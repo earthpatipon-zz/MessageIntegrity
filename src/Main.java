@@ -80,8 +80,8 @@ public class Main {
 			e.printStackTrace();
 		}
 
-//		System.out.println("-----Receiver-----");
-//		rp.read(algorithm, privateKey);
+		System.out.println("-----Receiver-----");
+		rp.read(algorithm, privateKey);
 	}
 
 }

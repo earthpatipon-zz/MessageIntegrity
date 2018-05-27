@@ -21,7 +21,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
-import org.apache.commons.codec.binary.*;
+//import org.apache.commons.codec.binary.*;
 
 public class Recipient2 {
 
@@ -62,7 +62,7 @@ public class Recipient2 {
 			System.out.println("digital signature: "+component[1]);
 			System.out.println("cipher text: "+component[2]);
 			
-			// Decrypt session key using private key of the recipient
+			// decrpyt session key using private key of the recipient
 //			Cipher sessionKey = Cipher.getInstance("RSA");
 //			sessionKey.init(Cipher.DECRYPT_MODE, privateKey);
 //			sessionKey.doFinal(component[0].getBytes());

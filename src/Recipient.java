@@ -59,7 +59,6 @@ public class Recipient {
 				Cipher cipher = Cipher.getInstance("RSA");
 				cipher.init(Cipher.DECRYPT_MODE, privateKey);
 				text = cipher.doFinal(text.getBytes()).toString();
-//				System.out.println("\nin case using key: "+text);
 			default:
 				break;
 			}
