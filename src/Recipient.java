@@ -61,7 +61,6 @@ public class Recipient {
 				Cipher cipher = Cipher.getInstance("RSA");
 				cipher.init(Cipher.DECRYPT_MODE, privateKey);
 				text = new String(cipher.doFinal(textByte));
-				System.out.println("\n decrypt: "+text);
 			default:
 				break;
 			}

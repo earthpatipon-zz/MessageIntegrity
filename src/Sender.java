@@ -55,13 +55,12 @@ public class Sender {
 			Cipher cipher = Cipher.getInstance("RSA");
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 			text = Base64.getEncoder().encodeToString(cipher.doFinal(text.getBytes()));
-			System.out.println("encrypt: "+text);
+//			System.out.println("encrypt: "+text);
 			break;
 		default:
 			break;
 		}
 		
-		System.out.println(text);
 		writeFile("email", text);
 	}
 
@@ -70,7 +69,6 @@ public class Sender {
 		FileWriter fw = null;
 
 		try {
-//			fw = new FileWriter("email/" + filename + ".txt");
 			fw = new FileWriter("inbox/" + filename + ".txt");
 			bw = new BufferedWriter(fw);
 			bw.write(text);

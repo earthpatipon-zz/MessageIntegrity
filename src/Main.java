@@ -81,7 +81,7 @@ public class Main {
 			e.printStackTrace();
 		}
 
-		System.out.println("-----Receiver-----");
+		System.out.println("-----Recipient-----");
 		rp.read(algorithm, privateKey);
 	}
 
