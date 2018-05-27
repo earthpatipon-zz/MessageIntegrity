@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 
 import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.swing.Box;
@@ -35,6 +36,7 @@ import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import javax.swing.JSeparator;
@@ -48,6 +50,7 @@ public class GUI_Email {
 	private JFrame frame;
 	private JTextField textField_2;
 	private JTextField textField;
+	private String word;
 
 	/**
 	 * Launch the application.
@@ -119,14 +122,7 @@ public class GUI_Email {
 			public void actionPerformed(ActionEvent arg0) {
 			}
 		});
-		button.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				JOptionPane.showMessageDialog(null, "This is the encrypt message","Encrypt message", JOptionPane.INFORMATION_MESSAGE);
-				Sender_GUI sender = new Sender_GUI();
-				sender.setVisible(true);
-			}
-		});
+		
 		button.setForeground(Color.WHITE);
 		button.setBackground(SystemColor.textHighlight);
 		button.setFont(new Font("Dialog", Font.BOLD, 12));
@@ -159,6 +155,7 @@ public class GUI_Email {
 		list.setModel(suggestList);
 		
 		//click list
+	
 		list.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent mouse) 
@@ -172,11 +169,108 @@ public class GUI_Email {
 			          if (point >= 0) 
 			          	{
 			        	  Object object = theList.getModel().getElementAt(point);
-			        	  String word= object.toString();
+			        	  word= object.toString();
 			        	  System.out.println("Your selected algorithm is "+ word);
 			        	  
 			          	}
 			        }
+			}
+		});
+		
+		button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				Sender sender1 = new Sender();
+				PrivateKey privateKey = null;
+				PublicKey publicKey = null;
+				KeyPairGenerator keyGen;
+				try {
+					if(word.equals("KEY"));
+					{
+					keyGen = KeyPairGenerator.getInstance("RSA");
+					keyGen.initialize(1024);
+					KeyPair keyPair = keyGen.genKeyPair();
+					publicKey = keyPair.getPublic();
+					}
+				} catch (NoSuchAlgorithmException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+		
+				try {
+					sender1.send(word, textArea.getText(), publicKey);
+				} catch (InvalidKeyException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException
+						| NoSuchAlgorithmException | IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				Sender_GUI sender = new Sender_GUI();
+				sender.setVisible(true);
+				switch (word) {
+				case "SHA-1":
+					try {
+						Sender send = new Sender();
+						String encrypt = send.sha1(textArea.getText());
+						JOptionPane.showMessageDialog(null, encrypt,"Encrypt Message", JOptionPane.INFORMATION_MESSAGE);
+		
+					} catch (NoSuchAlgorithmException e) {
+						e.printStackTrace();
+					}
+					break;
+				case "SHA-256":
+					try {
+						Sender send = new Sender();
+						String encrypt = send.sha256(textArea.getText());
+						JOptionPane.showMessageDialog(null, encrypt,"Encrypt Message", JOptionPane.INFORMATION_MESSAGE);
+					} catch (NoSuchAlgorithmException e) {
+						e.printStackTrace();
+					}
+					break;
+				case "MD5":
+					try {
+						Sender send = new Sender();
+						String encrypt = send.md5(textArea.getText());
+						JOptionPane.showMessageDialog(null, encrypt,"Encrypt Message", JOptionPane.INFORMATION_MESSAGE);
+					} catch (NoSuchAlgorithmException e) {
+						e.printStackTrace();
+					}
+					break;
+				case "Key":
+					Cipher cipher = null;
+					try {
+						cipher = Cipher.getInstance("RSA");
+					} catch (NoSuchAlgorithmException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (NoSuchPaddingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					try {
+						cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+					} catch (InvalidKeyException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					Sender send = new Sender();
+					String text = textArea.getText();
+					String encrypt = null;
+					try {
+						encrypt = cipher.doFinal(text.getBytes()).toString();
+					} catch (IllegalBlockSizeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (BadPaddingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					JOptionPane.showMessageDialog(null, encrypt,"Encrypt Message", JOptionPane.INFORMATION_MESSAGE);
+//					System.out.println("\nin case using key: "+text);
+					break;
+				default:
+					break;
+				}
 			}
 		});
 	}
