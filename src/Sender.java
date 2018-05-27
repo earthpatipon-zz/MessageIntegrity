@@ -4,10 +4,6 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Base64;
 
@@ -55,7 +51,7 @@ public class Sender {
 			Cipher cipher = Cipher.getInstance("RSA");
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 			text = Base64.getEncoder().encodeToString(cipher.doFinal(text.getBytes()));
-//			System.out.println("encrypt: "+text);
+			System.out.println("Encrypted: " + text);
 			break;
 		default:
 			break;

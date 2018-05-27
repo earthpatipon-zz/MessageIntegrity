@@ -4,11 +4,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
@@ -148,7 +144,6 @@ public class Recipient {
 	}
 	
 	public void getMessage(String text) {
-		System.out.println("You've got a message!");
-		System.out.println(text);
+		System.out.println("Received message: " + text);
 	}
 }
