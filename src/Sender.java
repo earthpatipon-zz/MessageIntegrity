@@ -51,11 +51,10 @@ public class Sender {
 			}
 			break;
 		case "Key":
-			System.out.println("hi");
 			Cipher cipher = Cipher.getInstance("RSA");
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 			text = cipher.doFinal(text.getBytes()).toString();
-			System.out.println("\nin case using key: "+text);
+//			System.out.println("in case using key: "+text);
 			break;
 		default:
 			break;
@@ -70,6 +69,7 @@ public class Sender {
 		FileWriter fw = null;
 
 		try {
+//			fw = new FileWriter("email/" + filename + ".txt");
 			fw = new FileWriter("inbox/" + filename + ".txt");
 			bw = new BufferedWriter(fw);
 			bw.write(text);

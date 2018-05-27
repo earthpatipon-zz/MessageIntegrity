@@ -35,7 +35,7 @@ public class Main {
 		System.out.println("2. Checksum with SHA-1");
 		System.out.println("3. Checksum with SHA-256");
 		System.out.println("4. Using Public Key and Private Key");
-		System.out.println("5. No, I prefer to not use message intigrety service.");
+		System.out.println("5. No, I prefer to not use message integrity service.");
 		System.out.print("Select algorithm (in number): ");
 
 		Scanner input = new Scanner(System.in);
