@@ -1,6 +1,11 @@
 
+<<<<<<< HEAD
 bin/Main.class
 bin/Recipient.class
 bin/Sender.class
 inbox/Checksum.txt
 inbox/Checksum.txt
+=======
+inbox/Checksum.txt
+inbox/email.txt
+>>>>>>> 5e26f6854ba4446c202f22a927d98ec965224187

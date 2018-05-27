@@ -17,13 +17,13 @@ public class Main {
 		String algorithm;
 		Sender sd = new Sender();
 		Recipient rp = new Recipient();
-		Attacker at = new Attacker();
 		
 		// TODO Auto-generated method stub
 		System.out.println("Available algorigthm for Message Integrity Service:");
-		System.out.println("1. Checksum with SHA-256");
-		System.out.println("2. Checksum with MD5");
-		System.out.println("3. Checksum with SHA-1");
+		System.out.println("1. Checksum with MD5");
+		System.out.println("2. Checksum with SHA-1");
+		System.out.println("3. Checksum with SHA-256");
+		System.out.println("4. No, I prefer to not use message intigrety service.");
 		System.out.print("Select algorithm (in number): ");
 		
 		Scanner input = new Scanner(System.in);
@@ -31,13 +31,16 @@ public class Main {
 	
 		switch(chose){
 			case 1:
-				algorithm = "SHA-256";
-				break;
-			case 2:
 				algorithm = "MD5";
 				break;
-			case 3:
+			case 2:
 				algorithm = "SHA-1";
+				break;
+			case 3:
+				algorithm = "SHA-256";
+				break;
+			case 4:
+				algorithm = "NONE";
 				break;
 			default:
 				algorithm = "";
@@ -47,24 +50,17 @@ public class Main {
 		System.out.println("-----Sender-----");
 		System.out.print("Write text in email: ");
 		String text = input.nextLine();
+		input.close();
 		
 		try {
-			sd.send(algorithm, text, rp.getPublicKey());
+			sd.send(algorithm, text);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		System.out.println("-----Attacker-----");
-		System.out.println("Have attacker or not? (y/n): ");
-		if (input.nextLine().equals("y")) {
-			at.attack(sd.getPath());
-		}
-
-		input.close();
-		
-		System.out.println("-----Recipient-----");
-		rp.read(algorithm, sd.getPublicKey());
+		System.out.println("-----Receiver-----");
+		rp.read(algorithm);
 	}
 
 }
