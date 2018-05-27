@@ -67,6 +67,10 @@ public class Recipient {
 //			String[] dsComponent = component[1].split(",");
 			text = component[2];
 			
+			System.out.println("\n"+component[0]);
+			System.out.println(component[1]);
+			System.out.println(text);
+			
 			// Decrypt session key using private key of the recipient
 			Cipher sessionKey = Cipher.getInstance("RSA");
 			sessionKey.init(Cipher.DECRYPT_MODE, privateKey);

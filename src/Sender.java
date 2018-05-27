@@ -86,14 +86,17 @@ public class Sender {
 
 		Cipher encryptedSessionKey = Cipher.getInstance("RSA");
 		encryptedSessionKey.init(Cipher.ENCRYPT_MODE, recipientPublicKey);
-		encryptedSessionKey.doFinal(sessionKey.toString().getBytes());
+//		encryptedSessionKey.doFinal(sessionKey.toString().getBytes());
 
 		// Encrypt the pain text using the session key
 		Cipher cipher = Cipher.getInstance("AES");
 		cipher.init(Cipher.ENCRYPT_MODE, sessionKey);
-		cipher.doFinal(text.getBytes());
-
-		String message = encryptedSessionKey + "," + digitalSignature + "," + cipher;
+//		cipher.doFinal(text.getBytes());
+//
+//		System.out.println("\ncipher: "+cipher+"\n");
+//		System.out.println("\ncipher: "+cipher.doFinal(text.getBytes())+"\n");
+		
+		String message = encryptedSessionKey.doFinal(sessionKey.toString().getBytes()) + "," + digitalSignature + "," + cipher.doFinal(text.getBytes());
 
 		// Radix-64 conversion
 		String encodedMessage = Base64.getEncoder().encodeToString(message.getBytes());
@@ -111,6 +114,7 @@ public class Sender {
 			bw = new BufferedWriter(fw);
 			bw.write(text);
 			bw.close();
+			System.out.println("\n"+text);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -160,8 +164,6 @@ public class Sender {
 	public String sha1(String text) throws NoSuchAlgorithmException {
 		MessageDigest md = MessageDigest.getInstance("SHA-1");
 		md.update(text.getBytes());
-		
-		System.out.println("\n\n"+md.toString());
 
 		// convert byte to hex
 		byte[] mdBytes = md.digest();
