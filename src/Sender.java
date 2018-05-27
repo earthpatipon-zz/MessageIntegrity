@@ -14,6 +14,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Base64;
 
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -193,6 +194,6 @@ public class Sender {
 		Cipher cipher = Cipher.getInstance(algo);
 		cipher.init(Cipher.ENCRYPT_MODE, key);
 		
-		return cipher.doFinal(text.getBytes());
+		return Base64.getEncoder().encode(cipher.doFinal(text.getBytes()));
 	}
 }
