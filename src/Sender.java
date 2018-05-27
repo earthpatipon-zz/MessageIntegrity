@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
@@ -69,34 +70,45 @@ public class Sender {
 		byte[] hashBytes = hash.getBytes();
 		
 		// Encrypt hash value with private key of the sender
-		Signature signature = Signature.getInstance("SHA1withRSA");
-		signature.initSign(privateKey);
-		signature.update(hashBytes);
-
-		byte[] digitalSignature = signature.sign();
+//		Signature signature = Signature.getInstance("SHA1withRSA");
+//		signature.initSign(privateKey);
+//		signature.update(hashBytes);
+//
+//		byte[] digitalSignature = signature.sign();
+//		
+//		signature.initVerify(publicKey);
+//		signature.update(hashBytes);
 		
-		signature.initVerify(publicKey);
-		signature.update(hashBytes);
+		byte[] digitalSignature = encryptor(privateKey, hashBytes.toString(), "RSA");
+		
+		System.out.println("\ndigital signature: "+digitalSignature);
 
 		// Create session key and encrypt it
 		SecureRandom random = new SecureRandom();
 		byte[] aesBytes = new byte[16];
 		random.nextBytes(aesBytes);
 		SecretKey sessionKey = new SecretKeySpec(aesBytes, "AES");
-
-		Cipher encryptedSessionKey = Cipher.getInstance("RSA");
-		encryptedSessionKey.init(Cipher.ENCRYPT_MODE, recipientPublicKey);
+		
+		byte[] encryptedSessionKey = encryptor(recipientPublicKey, sessionKey.toString(), "RSA");
+		System.out.println("\nsession key: "+encryptedSessionKey);
+//
+//		Cipher encryptedSessionKey = Cipher.getInstance("RSA");
+//		encryptedSessionKey.init(Cipher.ENCRYPT_MODE, recipientPublicKey);
 //		encryptedSessionKey.doFinal(sessionKey.toString().getBytes());
 
 		// Encrypt the pain text using the session key
-		Cipher cipher = Cipher.getInstance("AES");
-		cipher.init(Cipher.ENCRYPT_MODE, sessionKey);
+		byte[] cipherText = encryptor(sessionKey, text, "AES");
+		System.out.println("\ncipher text: "+cipherText);
+//		Cipher cipher = Cipher.getInstance("AES");
+//		cipher.init(Cipher.ENCRYPT_MODE, sessionKey);
 //		cipher.doFinal(text.getBytes());
 //
 //		System.out.println("\ncipher: "+cipher+"\n");
 //		System.out.println("\ncipher: "+cipher.doFinal(text.getBytes())+"\n");
 		
-		String message = encryptedSessionKey.doFinal(sessionKey.toString().getBytes()) + "," + digitalSignature + "," + cipher.doFinal(text.getBytes());
+		String message = encryptedSessionKey + "," + digitalSignature + "," + cipherText;
+
+//		String message = encryptedSessionKey.doFinal(sessionKey.toString().getBytes()) + "," + digitalSignature + "," + cipher.doFinal(text.getBytes());
 
 		// Radix-64 conversion
 		String encodedMessage = Base64.getEncoder().encodeToString(message.getBytes());
@@ -174,5 +186,13 @@ public class Sender {
 		}
 		System.out.println("Checksum with SHA-1 (Sender): " + strBuffer.toString());
 		return strBuffer.toString();
+	}
+	
+	private static byte[] encryptor(Key key, String text, String algo) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+		
+		Cipher cipher = Cipher.getInstance(algo);
+		cipher.init(Cipher.ENCRYPT_MODE, key);
+		
+		return cipher.doFinal(text.getBytes());
 	}
 }

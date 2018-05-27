@@ -20,6 +20,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
 
 public class Recipient {
 
@@ -42,14 +43,7 @@ public class Recipient {
 		
 		//Radix-64 conversion
 		byte[] decodedBytes = Base64.getDecoder().decode(text);
-		String message = new String(decodedBytes);
-		
-		/*
-		 *  message = sessionKeyComponent + dsComponent + cipher 	
-		 */
-		
-		String[] component = message.split(",");
-		System.out.println(component.length);
+		String[] component = new String(decodedBytes).split(",");
 		
 		/*
 		 * 
@@ -63,65 +57,74 @@ public class Recipient {
 		
 		if (component.length == 3) {
 			
-//			String[] sessionKeyComponent = component[0].split(",");
-//			String[] dsComponent = component[1].split(",");
-			text = component[2];
-			
-			System.out.println("\n"+component[0]);
-			System.out.println(component[1]);
-			System.out.println(text);
+			System.out.println("session key: "+component[0]);
+			System.out.println("digital signature: "+component[1]);
+			System.out.println("cipher text: "+component[2]);
 			
 			// Decrypt session key using private key of the recipient
-			Cipher sessionKey = Cipher.getInstance("RSA");
-			sessionKey.init(Cipher.DECRYPT_MODE, privateKey);
-			sessionKey.doFinal(component[0].getBytes());
+//			Cipher sessionKey = Cipher.getInstance("RSA");
+//			sessionKey.init(Cipher.DECRYPT_MODE, privateKey);
+//			sessionKey.doFinal(component[0].getBytes());
 			
-			// Verify Digital Signature
-			Signature sign = Signature.getInstance("SHA1withRSA");
-			sign.initVerify(senderPublicKey);
-			sign.update(text.getBytes());
+			SecretKeySpec sessionKey = new SecretKeySpec(decryptor(privateKey, component[0], "AES"), "AES");
+			System.out.println(sessionKey.toString());
 			
-			if (sign.verify(component[1].getBytes())) {
-				
-				Cipher cipher = Cipher.getInstance("AES");
-				cipher.init(Cipher.DECRYPT_MODE, (Key) sessionKey, cipher.getParameters());
-				byte[] sentTextBytes = cipher.doFinal(text.getBytes());
-				String sentText = new String(sentTextBytes);
-				
-				switch (algorithm) {
-					case "SHA-256":
-						try {
-							hash = sha256(sentText);
-							checksum = readFile("checksum");
-							validate(hash, checksum);
-						} catch (NoSuchAlgorithmException e) {
-							e.printStackTrace();
-						}
-						break;
-					case "MD5":
-						try {
-							hash = md5(sentText);
-							checksum = readFile("checksum");
-							validate(hash, checksum);
-						} catch (NoSuchAlgorithmException e) {
-							e.printStackTrace();
-						}
-						break;
-					case "SHA-1":
-						try {
-							hash = sha1(sentText);
-							checksum = readFile("checksum");
-							validate(hash, checksum);
-						} catch (NoSuchAlgorithmException e) {
-							e.printStackTrace();
-						}
-					default:
-						break;
-					}
-			}
-			else {
-				System.out.println("\ndigital signature not match\n");
-			}
+			// Decrypt Digital Signature
+			String digitalSignature = new String(decryptor(sessionKey, component[1], "RSA"));
+			System.out.println(digitalSignature);
+			
+			// Get pain text
+			String painText = new String(decryptor(sessionKey, component[2], "AES"));
+			System.out.println(painText);
+			
+			// Compare hash value
+			System.out.println("comparing hash value ...");
+			
+//			Signature sign = Signature.getInstance("SHA1withRSA");
+//			sign.initVerify(senderPublicKey);
+//			sign.update(text.getBytes());
+//			
+//			if (sign.verify(component[1].getBytes())) {
+//				
+//				Cipher cipher = Cipher.getInstance("AES");
+//				cipher.init(Cipher.DECRYPT_MODE, (Key) sessionKey, cipher.getParameters());
+//				byte[] sentTextBytes = cipher.doFinal(text.getBytes());
+//				String sentText = new String(sentTextBytes);
+//				
+//				switch (algorithm) {
+//					case "SHA-256":
+//						try {
+//							hash = sha256(sentText);
+//							checksum = readFile("checksum");
+//							validate(hash, checksum);
+//						} catch (NoSuchAlgorithmException e) {
+//							e.printStackTrace();
+//						}
+//						break;
+//					case "MD5":
+//						try {
+//							hash = md5(sentText);
+//							checksum = readFile("checksum");
+//							validate(hash, checksum);
+//						} catch (NoSuchAlgorithmException e) {
+//							e.printStackTrace();
+//						}
+//						break;
+//					case "SHA-1":
+//						try {
+//							hash = sha1(sentText);
+//							checksum = readFile("checksum");
+//							validate(hash, checksum);
+//						} catch (NoSuchAlgorithmException e) {
+//							e.printStackTrace();
+//						}
+//					default:
+//						break;
+//					}
+//			}
+//			else {
+//				System.out.println("\ndigital signature not match\n");
+//			}
 			
 		}
 		else {
@@ -172,7 +175,7 @@ public class Recipient {
 			strBuffer.append(hex);
 		}
 		System.out.println("Text in email: " + text);
-		System.out.println("Checksum with SHA-256 (Receiver): " + strBuffer.toString());
+		System.out.println("Checksum with SHA-256 (Recipient): " + strBuffer.toString());
 		return strBuffer.toString();
 	}
 	
@@ -214,5 +217,13 @@ public class Recipient {
 	
 	public PublicKey getPublicKey () {
 		return publicKey;
+	}
+	
+	private static byte[] decryptor(Key key, String cipher, String algo) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+		
+		Cipher cph = Cipher.getInstance(algo);
+		cph.init(Cipher.DECRYPT_MODE, key);
+		
+		return cph.doFinal(cipher.getBytes());
 	}
 }
