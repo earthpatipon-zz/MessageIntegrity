@@ -24,13 +24,7 @@ public class Main {
 		String algorithm = "";
 		Sender sd = new Sender();
 		Recipient rp = new Recipient();
-<<<<<<< HEAD
-		
-		GUI_Email guiEmail = new GUI_Email();
-		
-=======
 
->>>>>>> 73a32d37cb4347d3a927c757f298615374203283
 		// TODO Auto-generated method stub
 		System.out.println("Available algorigthm for Message Integrity Service:");
 		System.out.println("1. Checksum with MD5");
