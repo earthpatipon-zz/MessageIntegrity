@@ -14,7 +14,7 @@ public class Attacker {
 	public void attack (String path) throws FileNotFoundException {
 		try {
 			
-			String str = "Attacked!";
+			String str = "I hate you";
 			BufferedWriter bw = new BufferedWriter (new FileWriter (new File (path)));
 			bw.write(str);
 			

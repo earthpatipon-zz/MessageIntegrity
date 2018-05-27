@@ -9,6 +9,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -53,8 +54,8 @@ public class Sender {
 		case "Key":
 			Cipher cipher = Cipher.getInstance("RSA");
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-			text = cipher.doFinal(text.getBytes()).toString();
-//			System.out.println("in case using key: "+text);
+			text = Base64.getEncoder().encodeToString(cipher.doFinal(text.getBytes()));
+			System.out.println("encrypt: "+text);
 			break;
 		default:
 			break;

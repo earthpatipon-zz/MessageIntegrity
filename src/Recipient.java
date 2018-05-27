@@ -9,6 +9,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -56,9 +57,11 @@ public class Recipient {
 				}
 				break;
 			case "Key":
+				byte[] textByte = Base64.getDecoder().decode(text);
 				Cipher cipher = Cipher.getInstance("RSA");
 				cipher.init(Cipher.DECRYPT_MODE, privateKey);
-				text = cipher.doFinal(text.getBytes()).toString();
+				text = new String(cipher.doFinal(textByte));
+				System.out.println("\n decrypt: "+text);
 			default:
 				break;
 			}
