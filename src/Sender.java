@@ -3,27 +3,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-<<<<<<< HEAD
-=======
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.SignatureException;
-import java.util.Base64;
-
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-//import org.apache.commons.codec.binary.Base64.encodeBase64String;
->>>>>>> 38175450b8471d80b6378155cdf630b6b1e7ad15
 
 public class Sender {
 
@@ -36,6 +15,14 @@ public class Sender {
 		writeFile("email", text);
 
 		switch (algorithm) {
+		case "SHA-1":
+			try {
+				hash = sha1(text);
+				writeFile("checksum", hash);
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+			break;
 		case "SHA-256":
 			try {
 				hash = sha256(text);
@@ -55,58 +42,6 @@ public class Sender {
 		default:
 			break;
 		}
-<<<<<<< HEAD
-=======
-
-		byte[] hashBytes = hash.getBytes();
-		
-		// Encrypt hash value with private key of the sender
-//		Signature signature = Signature.getInstance("SHA1withRSA");
-//		signature.initSign(privateKey);
-//		signature.update(hashBytes);
-//
-//		byte[] digitalSignature = signature.sign();
-//		
-//		signature.initVerify(publicKey);
-//		signature.update(hashBytes);
-		
-		byte[] digitalSignature = encryptor(privateKey, hashBytes.toString(), "RSA");
-		
-		System.out.println("\ndigital signature: "+digitalSignature);
-
-		// Create session key and encrypt it
-		SecureRandom random = new SecureRandom();
-		byte[] aesBytes = new byte[16];
-		random.nextBytes(aesBytes);
-		SecretKey sessionKey = new SecretKeySpec(aesBytes, "AES");
-		
-		System.out.println("1: ---------------------");
-		byte[] encryptedSessionKey = encryptor(recipientPublicKey, sessionKey.toString(), "RSA");
-		System.out.println("\nsession key: "+encryptedSessionKey);
-//
-//		Cipher encryptedSessionKey = Cipher.getInstance("RSA");
-//		encryptedSessionKey.init(Cipher.ENCRYPT_MODE, recipientPublicKey);
-//		encryptedSessionKey.doFinal(sessionKey.toString().getBytes());
-
-		// Encrypt the pain text using the session key
-		byte[] cipherText = encryptor(sessionKey, text, "AES");
-		System.out.println("\ncipher text: "+cipherText);
-//		Cipher cipher = Cipher.getInstance("AES");
-//		cipher.init(Cipher.ENCRYPT_MODE, sessionKey);
-//		cipher.doFinal(text.getBytes());
-//
-//		System.out.println("\ncipher: "+cipher+"\n");
-//		System.out.println("\ncipher: "+cipher.doFinal(text.getBytes())+"\n");
-		
-		String message = encryptedSessionKey + "," + digitalSignature + "," + cipherText;
-
-//		String message = encryptedSessionKey.doFinal(sessionKey.toString().getBytes()) + "," + digitalSignature + "," + cipher.doFinal(text.getBytes());
-
-		// Radix-64 conversion
-		String encodedMessage = Base64.getEncoder().encodeToString(message.getBytes());
-
-		writeFile("email", encodedMessage);
->>>>>>> 38175450b8471d80b6378155cdf630b6b1e7ad15
 	}
 
 	public void writeFile(String filename, String text) {
@@ -154,7 +89,6 @@ public class Sender {
 		return strBuffer.toString();
 	}
 	
-<<<<<<< HEAD
 	public String sha256(String text) throws NoSuchAlgorithmException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256");
 		md.update(text.getBytes());
@@ -170,17 +104,6 @@ public class Sender {
 		}
 		System.out.println("Checksum with SHA-256 (Sender): " + strBuffer.toString());
 		return strBuffer.toString();
-=======
-	private static byte[] encryptor(Key key, String text, String algo) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-		
-		Cipher cipher = Cipher.getInstance(algo);
-		cipher.init(Cipher.ENCRYPT_MODE, key);
-		
-		System.out.println("\n-------------------------------------------------------");
-		System.out.println(cipher.doFinal(text.getBytes()));
-		System.out.println(Base64.getEncoder().encode(cipher.doFinal(text.getBytes())));
-		
-		return Base64.getEncoder().encode(cipher.doFinal(text.getBytes()));
->>>>>>> 38175450b8471d80b6378155cdf630b6b1e7ad15
 	}
+	
 }

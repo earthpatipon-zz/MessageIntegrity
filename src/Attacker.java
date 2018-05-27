@@ -9,7 +9,6 @@ import java.io.IOException;
 public class Attacker {
 
 	public Attacker () {
-		// Constructor
 	}
 	
 	public void attack (String path) throws FileNotFoundException {
