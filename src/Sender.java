@@ -11,7 +11,6 @@ import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Base64;
 
@@ -22,7 +21,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import org.apache.commons.codec.binary.*;
+//import org.apache.commons.codec.binary.Base64.encodeBase64String;
 
 public class Sender {
 
@@ -92,6 +91,7 @@ public class Sender {
 		random.nextBytes(aesBytes);
 		SecretKey sessionKey = new SecretKeySpec(aesBytes, "AES");
 		
+		System.out.println("1: ---------------------");
 		byte[] encryptedSessionKey = encryptor(recipientPublicKey, sessionKey.toString(), "RSA");
 		System.out.println("\nsession key: "+encryptedSessionKey);
 //
@@ -195,6 +195,10 @@ public class Sender {
 		
 		Cipher cipher = Cipher.getInstance(algo);
 		cipher.init(Cipher.ENCRYPT_MODE, key);
+		
+		System.out.println("\n-------------------------------------------------------");
+		System.out.println(cipher.doFinal(text.getBytes()));
+		System.out.println(Base64.getEncoder().encode(cipher.doFinal(text.getBytes())));
 		
 		return Base64.getEncoder().encode(cipher.doFinal(text.getBytes()));
 	}
