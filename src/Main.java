@@ -18,6 +18,8 @@ public class Main {
 		Sender sd = new Sender();
 		Recipient rp = new Recipient();
 		
+		GUI_Email guiEmail = new GUI_Email();
+		
 		// TODO Auto-generated method stub
 		System.out.println("Available algorigthm for Message Integrity Service:");
 		System.out.println("1. Checksum with MD5");
