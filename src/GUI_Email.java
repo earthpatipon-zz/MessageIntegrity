@@ -2,9 +2,14 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
+
 import java.awt.Color;
 import java.awt.Dimension;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -25,7 +30,18 @@ import java.awt.Button;
 import javax.swing.UIManager;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+
 import javax.swing.JSeparator;
+import java.awt.List;
+import javax.swing.JList;
+import java.awt.ScrollPane;
+import javax.swing.JScrollPane;
 
 public class GUI_Email {
 
@@ -77,24 +93,24 @@ public class GUI_Email {
 		label.setFont(new Font("Dialog", Font.BOLD, 12));
 		label.setAlignment(Label.CENTER);
 		label.setBackground(SystemColor.menu);
-		label.setBounds(43, 92, 70, 37);
+		label.setBounds(202, 92, 70, 37);
 		frame.getContentPane().add(label);
 		
 		textField_2 = new JTextField();
 		textField_2.setBackground(SystemColor.window);
 		textField_2.setUI(new JTextFieldHintUI("Add a subject", Color.gray));
-		textField_2.setBounds(43, 165, 577, 37);
+		textField_2.setBounds(202, 165, 435, 37);
 		frame.getContentPane().add(textField_2);
 		textField_2.setColumns(10);
 		
 		textField = new JTextField();
-		textField.setBounds(148, 92, 472, 37);
+		textField.setBounds(278, 92, 359, 37);
 		frame.getContentPane().add(textField);
 		textField.setColumns(10);
 		
 		JTextArea textArea = new JTextArea();
 		textArea.setRows(10);
-		textArea.setBounds(43, 241, 577, 204);
+		textArea.setBounds(202, 241, 435, 204);
 		frame.getContentPane().add(textArea);
 		textArea.setUI(new JTextFieldHintUI("Add a message", Color.gray));
 		
@@ -114,11 +130,11 @@ public class GUI_Email {
 		button.setForeground(Color.WHITE);
 		button.setBackground(SystemColor.textHighlight);
 		button.setFont(new Font("Dialog", Font.BOLD, 12));
-		button.setBounds(43, 473, 90, 37);
+		button.setBounds(530, 477, 90, 37);
 		frame.getContentPane().add(button);
 		
 		JSeparator separator = new JSeparator();
-		separator.setBounds(43, 64, 577, 22);
+		separator.setBounds(21, 64, 616, 22);
 		frame.getContentPane().add(separator);
 		
 		JLabel lblNewLabel = new JLabel("Sender Mailbox");
@@ -126,5 +142,42 @@ public class GUI_Email {
 		lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 30));
 		lblNewLabel.setBounds(189, 14, 271, 37);
 		frame.getContentPane().add(lblNewLabel);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(21, 92, 153, 353);
+		frame.getContentPane().add(scrollPane);
+		
+		JList list = new JList();
+		list.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		scrollPane.setViewportView(list);
+		DefaultListModel suggestList = new DefaultListModel();
+		suggestList.addElement("MD5");
+		suggestList.addElement("SHA-1");
+		suggestList.addElement("SHA-256");
+		suggestList.addElement("KEY");
+		suggestList.addElement("NONE");
+		list.setModel(suggestList);
+		
+		//click list
+		list.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent mouse) 
+			{
+				int point;
+				int count = mouse.getClickCount();
+				 JList theList = (JList) mouse.getSource();
+			        if (count == 2) //double click
+			        {
+			          point = theList.locationToIndex(mouse.getPoint());
+			          if (point >= 0) 
+			          	{
+			        	  Object object = theList.getModel().getElementAt(point);
+			        	  String word= object.toString();
+			        	  System.out.println("Your selected algorithm is "+ word);
+			        	  
+			          	}
+			        }
+			}
+		});
 	}
 }
