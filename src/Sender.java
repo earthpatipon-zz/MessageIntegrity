@@ -3,6 +3,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.InvalidKeyException;
 import java.security.PublicKey;
 import java.util.Base64;
@@ -20,8 +21,18 @@ public class Sender {
 	}
 
 	public void send(String algorithm, String text, PublicKey publicKey) throws IOException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchAlgorithmException {
-		//writeFile("email", text);
+		writeFile("email", text);
 
+		String[] message = text.split(","); //message[0] = recipient name
+											//other = content
+		
+		text = message[1];
+		if (message.length > 2) {
+			for (int i = 2; i < message.length; i++) {
+				text += "," + message[i];
+			}
+		}
+		
 		switch (algorithm) {
 		case "SHA-1":
 			try {
@@ -47,17 +58,18 @@ public class Sender {
 				e.printStackTrace();
 			}
 			break;
-		case "Key":
+		case "Asymmetric Encryption":
 			Cipher cipher = Cipher.getInstance("RSA");
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 			text = Base64.getEncoder().encodeToString(cipher.doFinal(text.getBytes()));
 			System.out.println("Encrypted: " + text);
+			hash = text;
 			break;
 		default:
 			break;
 		}
 		
-		writeFile("email", text);
+		//writeFile("email", message[0] + "," + text);
 	}
 
 	public void writeFile(String filename, String text) {
@@ -122,4 +134,8 @@ public class Sender {
 		return strBuffer.toString();
 	}
 	
+	public String getHash() {
+		return this.hash;
+	}
+
 }

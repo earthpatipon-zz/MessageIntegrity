@@ -32,15 +32,18 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.util.Base64;
 
 import javax.swing.JTextArea;
+import javax.swing.event.AncestorListener;
+import javax.swing.event.AncestorEvent;
 
 public class Sender_GUI extends JFrame {
 
 	private JPanel contentPane;
 	private String decrypt="";
-	private String text;
-
+	private static String text;
+	
 	/**
 	 * Launch the application.
 	 */
@@ -48,6 +51,7 @@ public class Sender_GUI extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					text = readFile("email");
 					Sender_GUI frame = new Sender_GUI();
 					frame.setVisible(true);
 				} catch (Exception e) {
@@ -60,69 +64,60 @@ public class Sender_GUI extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public Sender_GUI() {
-		initialize();
-		
-		
-	}
+//	public Sender_GUI(String text) {
+//		initialize(text);
+//	}
 	
-	public Sender_GUI(String algorithm, PrivateKey privatekey) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
-	
+	public Sender_GUI() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+		
 		Recipient rp = new Recipient();
-		rp.read(algorithm, privatekey);
-		
-		switch (algorithm) {
-		case "SHA-1":
-			try {
-				text = readFile("email");
-				decrypt = rp.sha1(algorithm);
-				
-			
-				
-			} catch (NoSuchAlgorithmException e) {
-				e.printStackTrace();
-			}
-			break;
-		case "SHA-256":
-			try {
-				text = readFile("email");
-				decrypt = rp.sha256(algorithm);
-			} catch (NoSuchAlgorithmException e) {
-				e.printStackTrace();
-			}
-			break;
-		case "MD5":
-			try {
-				text = readFile("email");
-				decrypt = rp.md5(algorithm);
-			} catch (NoSuchAlgorithmException e) {
-				e.printStackTrace();
-			}
-			break;
-		case "Key":
-			text = readFile("email");
-			Cipher cipher = Cipher.getInstance("RSA");
-			cipher.init(Cipher.DECRYPT_MODE, privatekey);
-			text = cipher.doFinal(text.getBytes()).toString();
-//			System.out.println("\nin case using key: "+text);
-		default:
-			break;
+		String algorithm = rp.readFile("algorithm");
+		if(algorithm != "None") {
+			PrivateKey privatekey = rp.getPrivateKey();
+			rp.read(algorithm, privatekey);
+			decrypt = rp.getHash();
 		}
-		initialize();
+		
+		String[] message = rp.readFile("email").split(",");
+		
+		rp.setName(message[0]);
+		text = message[1];
+		if (message.length > 2) {
+			for (int i = 2; i < message.length; i++) {
+				text += "," + message[i];
+			}
+		}
+		initialize(rp, text);
 	}
 	
-	private void initialize() {
+	private void initialize(Recipient rp, String text) {
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 672, 578);
 		contentPane = new JPanel();
+		contentPane.addAncestorListener(new AncestorListener() {
+			public void ancestorAdded(AncestorEvent arg0) {
+				if (!rp.readFile("algorithm").equals("None")) {
+					String warning = rp.validate(rp.getHash(), rp.readFile("checksum"));
+					if (warning.equals("Integrity lost!"))
+					{
+						JOptionPane.showMessageDialog(null, warning, "Warning", JOptionPane.ERROR_MESSAGE);
+					}
+					else
+						JOptionPane.showMessageDialog(null, warning, "Confirm message", JOptionPane.INFORMATION_MESSAGE);
+				}
+			}
+			public void ancestorMoved(AncestorEvent arg0) {
+			}
+			public void ancestorRemoved(AncestorEvent arg0) {
+			}
+		});
 		contentPane.setBackground(SystemColor.info);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		setLocationRelativeTo(null); 
 
-		
 		Label label_2 = new Label("Sent Items");
 		label_2.setFont(new Font("Dialog", Font.PLAIN, 18));
 		label_2.setBackground(new Color(255, 255, 255));
@@ -154,7 +149,7 @@ public class Sender_GUI extends JFrame {
 		label_3.setBounds(0, 123, 163, 24);
 		contentPane.add(label_3);
 		
-		Label label_4 = new Label("Name Surname");
+		Label label_4 = new Label(rp.getName());
 		label_4.setFont(new Font("Dialog", Font.PLAIN, 20));
 		label_4.setBackground(SystemColor.info);
 		label_4.setBounds(271, 113, 293, 24);
@@ -179,18 +174,12 @@ public class Sender_GUI extends JFrame {
 		
 		TextArea textArea = new TextArea();
 		textArea.setFont(new Font("Dialog", Font.PLAIN, 20));
-		textArea.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				JOptionPane.showMessageDialog(null, decrypt,"Decrypt message", JOptionPane.INFORMATION_MESSAGE);
-			}
-		});
 		textArea.setText(text);
 		textArea.setEditable(false);
 		textArea.setBounds(189, 204, 440, 295);
 		contentPane.add(textArea);
 	}
-	public String readFile(String filename) {
+	public static String readFile(String filename) {
 		BufferedReader br = null;
 		FileReader fr = null;
 		StringBuilder sb = null;
@@ -204,6 +193,14 @@ public class Sender_GUI extends JFrame {
 			while ((currentLine = br.readLine()) != null) {
 				sb.append(currentLine);
 			}
+//			String[] message = sb.toString().split(",");
+//			sb.setLength(0); 
+//			sb.append(message[1]);
+//			if (message.length > 2) {
+//				for (int i = 2; i < message.length; i++) {
+//					sb.append("," + message[i]);
+//				}
+//			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

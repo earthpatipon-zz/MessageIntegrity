@@ -1,5 +1,7 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -17,12 +19,23 @@ public class Recipient {
 	private String hash;
 	private String text;
 	private String checksum;
+	private PrivateKey privateKey;
+	private String rpName;
 	
 	public Recipient() {
 	}
 
 	public void read(String algorithm, PrivateKey privateKey) throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
 		text = readFile("email");
+		
+		String[] message = text.split(","); //message[0] = recipient name
+											//other = content
+		text = message[1];
+		if (message.length > 2) {
+			for (int i = 2; i < message.length; i++) {
+				text += "," + message[i];
+			}
+		}
 
 		switch (algorithm) {
 			case "SHA-1":
@@ -52,18 +65,34 @@ public class Recipient {
 					e.printStackTrace();
 				}
 				break;
-			case "Key":
+			case "Asymmetric Encryption":
 				byte[] textByte = Base64.getDecoder().decode(text);
 				Cipher cipher = Cipher.getInstance("RSA");
 				cipher.init(Cipher.DECRYPT_MODE, privateKey);
 				text = new String(cipher.doFinal(textByte));
+				hash = text;
+				writeFile("email", hash);
 			default:
+				
 				break;
 			}
-		
-		getMessage(text);
 	}
+	
+	public void writeFile(String filename, String text) {
+		BufferedWriter bw = null;
+		FileWriter fw = null;
 
+		try {
+			fw = new FileWriter("inbox/" + filename + ".txt");
+			bw = new BufferedWriter(fw);
+			bw.write(text);
+			bw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+	
 	public String readFile(String filename) {
 		BufferedReader br = null;
 		FileReader fr = null;
@@ -84,12 +113,14 @@ public class Recipient {
 		return sb.toString();
 	}
 	
-	public void validate(String hashText, String checksumValue) {
+	public String validate(String hashText, String checksumValue) {
 		if(hashText.equals(checksumValue)) {
-			System.out.println("Correct. This email message is secured.");
+			//System.out.println("Correct. This email message is secured.");
+			return "Integrity maintain!";
 		}
 		else {
-			System.out.println("Incorrect. This email message isn't secured.");
+			//System.out.println("Incorrect. This email message isn't secured.");
+			return "Integrity lost!";
 		}
 	}
 	
@@ -104,8 +135,8 @@ public class Recipient {
 			// set strBuffer 
 			strBuffer.append(Integer.toString((mdBytes[i] & 0xff) + 0x100, 16).substring(1));
 		}
-		System.out.println("Text in email: " + text);
-		System.out.println("Checksum with MD5 (Recipient): " + strBuffer.toString());
+		//System.out.println("Text in email: " + text);
+		//System.out.println("Checksum with MD5 (Recipient): " + strBuffer.toString());
 		return strBuffer.toString();
 	}
 	
@@ -120,8 +151,8 @@ public class Recipient {
 			// set strBuffer 
 			strBuffer.append(Integer.toString((mdBytes[i] & 0xff) + 0x100, 16).substring(1));
 		}
-		System.out.println("Text in email: " + text);
-		System.out.println("Checksum with SHA-1 (Recipient): " + strBuffer.toString());
+		//System.out.println("Text in email: " + text);
+		//System.out.println("Checksum with SHA-1 (Recipient): " + strBuffer.toString());
 		return strBuffer.toString();
 	}
 	
@@ -138,12 +169,28 @@ public class Recipient {
 				strBuffer.append('0');
 			strBuffer.append(hex);
 		}
-		System.out.println("Text in email: " + text);
-		System.out.println("Checksum with SHA-256 (Recipient): " + strBuffer.toString());
+		//System.out.println("Text in email: " + text);
+		//System.out.println("Checksum with SHA-256 (Recipient): " + strBuffer.toString());
 		return strBuffer.toString();
 	}
 	
-	public void getMessage(String text) {
-		System.out.println("Received message: " + text);
+	public String getHash() {
+		return this.hash;
+	}
+
+	public void setPrivateKey(PrivateKey key) {
+		this.privateKey = key;
+	}
+	
+	public PrivateKey getPrivateKey() {
+		return this.privateKey;
+	}
+	
+	public void setName(String name) {
+		this.rpName = name;
+	}
+	
+	public String getName() {
+		return this.rpName;
 	}
 }
